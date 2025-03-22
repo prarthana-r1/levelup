@@ -456,6 +456,26 @@
             }
         }
 
+
+        function showMessage(message, type) {
+    const messageContainer = document.getElementById('message-container');
+    let icon = '';
+
+    if (type === 'success') {
+        icon = `<img src="{{ url_for('static', filename='thumbs-up.png') }}" 
+                  alt="Thumbs up" 
+                  style="width: 70px;height: 50px; vertical-align: middle; margin-left: 10px;">`;
+    }
+
+    messageContainer.innerHTML = `
+        <div class="message ${type}">
+            ${message} ${icon}
+        </div>
+    `;
+}
+
+
+
         function revealWordHint() {
             const wordHint = document.getElementById('word-hint');
             wordHint.style.display = 'block';
@@ -474,28 +494,29 @@
 
         function checkGuess(guess) {
             if (isLoading) return;
-            
-            if (!guess || guess.trim() === '') {
-                showMessage('Please enter a valid guess.', 'error');
-                return;
-            }
-            
-            const normalizedGuess = guess.toLowerCase().trim();
-            const normalizedSecret = secretWord.toLowerCase();
-            
-            attempts++;
-            guesses.push(normalizedGuess);
-            updateGuessHistory();
-            
-            if (normalizedGuess === normalizedSecret) {
-                // Correct guess
-                gameWon = true;
-                const scoreValue = (maxAttempts - attempts + 1) * 20;
-                showMessage(`Correct! The word is "${secretWord}". You earned ${scoreValue} points!`, 'success');
-                document.getElementById('guess-input').disabled = true;
-                document.getElementById('guess-button').disabled = true;
-                document.getElementById('hint-button').disabled = true;
-                document.getElementById('reset-button').style.display = 'block';
+    
+    if (!guess || guess.trim() === '') {
+        showMessage('Please enter a valid guess.', 'error');
+        return;
+    }
+    
+    const normalizedGuess = guess.toLowerCase().trim();
+    const normalizedSecret = secretWord.toLowerCase();
+    
+    attempts++;
+    guesses.push(normalizedGuess);
+    updateGuessHistory();
+    
+    if (normalizedGuess === normalizedSecret) {
+        // Correct guess
+        gameWon = true;
+        const scoreValue = (maxAttempts - attempts + 1) * 20;
+        showMessage(`✅ Correct! The word is "${secretWord}". You earned ${scoreValue} points!`, 'success');
+        
+        document.getElementById('guess-input').disabled = true;
+        document.getElementById('guess-button').disabled = true;
+        document.getElementById('hint-button').disabled = true;
+        document.getElementById('reset-button').style.display = 'block';
             } else {
                 // Incorrect guess
                 if (attempts >= maxAttempts) {

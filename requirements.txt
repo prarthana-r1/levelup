@@ -2,3 +2,8 @@ Flask==2.3.2
 gunicorn
 selenium
 webdriver-manager
+flask-jwt-extended
+pymongo
+dnspython
+bcrypt
+python-dotenv

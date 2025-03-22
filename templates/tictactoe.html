@@ -72,47 +72,18 @@
     background-color: var(--primary-dark);
 }
 
-.winning-line {
-    position: relative;
+@keyframes confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
 
-.winning-line::before {
-    content: '';
-    position: absolute;
-    background-color: rgba(99, 102, 241, 0.3);
-    z-index: 1;
-}
-
-.winning-line.horizontal::before {
-    height: 10px;
-    width: 100%;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-}
-
-.winning-line.vertical::before {
-    width: 10px;
-    height: 100%;
-    left: 50%;
+.confetti {
+    position: fixed;
     top: 0;
-    transform: translateX(-50%);
-}
-
-.winning-line.diagonal-1::before {
-    height: 10px;
-    width: 140%;
-    top: 50%;
-    left: -20%;
-    transform: translateY(-50%) rotate(45deg);
-}
-
-.winning-line.diagonal-2::before {
-    height: 10px;
-    width: 140%;
-    top: 50%;
-    left: -20%;
-    transform: translateY(-50%) rotate(-45deg);
+    width: 12px;
+    height: 12px;
+    opacity: 0.8;
+    animation: confetti 2.5s linear infinite;
 }
 </style>
 {% endblock %}
@@ -171,30 +142,17 @@
         }
         
         function checkWin() {
-            let roundWon = false;
-            let winningLine = null;
-            
-            for (let i = 0; i < winningConditions.length; i++) {
-                const [a, b, c] = winningConditions[i];
-                if (gameState[a] === '' || gameState[b] === '' || gameState[c] === '') {
-                    continue;
-                }
-                if (gameState[a] === gameState[b] && gameState[b] === gameState[c]) {
-                    roundWon = true;
-                    winningLine = i;
-                    break;
+            for (const condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (gameState[a] && gameState[a] === gameState[b] && gameState[b] === gameState[c]) {
+                    tttStatus.textContent = `${currentPlayer} wins!`;
+                    gameActive = false;
+                    celebrateWin();
+                    return;
                 }
             }
             
-            if (roundWon) {
-                highlightWinningLine(winningLine);
-                tttStatus.textContent = `${currentPlayer} wins!`;
-                gameActive = false;
-                return;
-            }
-            
-            const roundDraw = !gameState.includes('');
-            if (roundDraw) {
+            if (!gameState.includes('')) {
                 tttStatus.textContent = 'Game ended in a draw!';
                 gameActive = false;
                 return;
@@ -204,31 +162,17 @@
             tttStatus.textContent = `${currentPlayer}'s turn`;
         }
         
-        function highlightWinningLine(index) {
-            const [a, b, c] = winningConditions[index];
-            const cells = document.querySelectorAll('.ttt-cell');
-            
-            // Determine line type
-            if (index < 3) {
-                // Horizontal
-                cells[a].classList.add('winning-line', 'horizontal');
-                cells[b].classList.add('winning-line', 'horizontal');
-                cells[c].classList.add('winning-line', 'horizontal');
-            } else if (index < 6) {
-                // Vertical
-                cells[a].classList.add('winning-line', 'vertical');
-                cells[b].classList.add('winning-line', 'vertical');
-                cells[c].classList.add('winning-line', 'vertical');
-            } else if (index === 6) {
-                // Diagonal \
-                cells[a].classList.add('winning-line', 'diagonal-1');
-                cells[b].classList.add('winning-line', 'diagonal-1');
-                cells[c].classList.add('winning-line', 'diagonal-1');
-            } else {
-                // Diagonal /
-                cells[a].classList.add('winning-line', 'diagonal-2');
-                cells[b].classList.add('winning-line', 'diagonal-2');
-                cells[c].classList.add('winning-line', 'diagonal-2');
+        function celebrateWin() {
+            for (let i = 0; i < 150; i++) {
+                let confetti = document.createElement("div");
+                confetti.classList.add("confetti");
+                confetti.style.left = Math.random() * 100 + "vw";
+                confetti.style.width = Math.random() * 15 + 5 + "px";
+                confetti.style.height = confetti.style.width;
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.animationDuration = Math.random() * 3 + 2 + "s";
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
             }
         }
         
@@ -241,14 +185,10 @@
             tttCells.forEach(cell => {
                 cell.textContent = '';
                 cell.setAttribute('data-player', '');
-                cell.classList.remove('winning-line', 'horizontal', 'vertical', 'diagonal-1', 'diagonal-2');
             });
         }
         
-        tttCells.forEach(cell => {
-            cell.addEventListener('click', handleCellClick);
-        });
-        
+        tttCells.forEach(cell => cell.addEventListener('click', handleCellClick));
         tttReset.addEventListener('click', resetTttGame);
     });
 </script>

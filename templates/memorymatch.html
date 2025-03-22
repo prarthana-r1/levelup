@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block title %}Memory Match Challenge - LetsChiLL{% endblock %}
+
+{% block game_title %}Memory Match Challenge{% endblock %}
+{% block game_description %}Flip the cards and find matching pairs before time runs out!{% endblock %}
+
+{% block additional_styles %}
+<style>
+.memory-game-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.card {
+    width: 80px;
+    height: 80px;
+    background-color: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.3s;
+}
+
+.card.flipped {
+    background-color: white;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.reset-button {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+@keyframes confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.confetti {
+    position: fixed;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    opacity: 0.8;
+    animation: confetti 2.5s linear infinite;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="memory-game-container">
+    <h2>Find all the matching pairs!</h2>
+    <div class="grid" id="game-grid"></div>
+    <button id="reset-button" class="reset-button">Restart Game</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    function generateRandomShapesAndImages() {
+        const symbols = ['\u25A0', '\u25B2', '\u25C6', '\u25CB', '🐶', '🐱', '🐼', '🦁'];
+        let pairs = [...symbols, ...symbols]; // Create 8 pairs for 4x4 grid
+        return pairs.sort(() => Math.random() - 0.5);
+    }
+
+    let shuffledSymbols = generateRandomShapesAndImages();
+    let firstCard = null;
+    let secondCard = null;
+    let matchedPairs = 0;
+
+    function createBoard() {
+        const gameGrid = document.getElementById("game-grid");
+        gameGrid.innerHTML = "";
+        shuffledSymbols.forEach((symbol, index) => {
+            const card = document.createElement("div");
+            card.classList.add("card");
+            card.dataset.symbol = symbol;
+            card.dataset.index = index;
+            card.addEventListener("click", flipCard);
+            gameGrid.appendChild(card);
+        });
+    }
+
+    function flipCard() {
+        if (this.classList.contains("flipped") || secondCard) return;
+        this.textContent = this.dataset.symbol;
+        this.classList.add("flipped");
+        if (!firstCard) {
+            firstCard = this;
+        } else {
+            secondCard = this;
+            setTimeout(checkMatch, 500);
+        }
+    }
+
+    function checkMatch() {
+        if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
+            firstCard.classList.add("hidden");
+            secondCard.classList.add("hidden");
+            matchedPairs++;
+            if (matchedPairs === 8) {
+                celebrateWin();
+            }
+        } else {
+            firstCard.classList.remove("flipped");
+            secondCard.classList.remove("flipped");
+            firstCard.textContent = "";
+            secondCard.textContent = "";
+        }
+        firstCard = null;
+        secondCard = null;
+    }
+
+    function celebrateWin() {
+        for (let i = 0; i < 150; i++) {
+            let confetti = document.createElement("div");
+            confetti.classList.add("confetti");
+            confetti.style.left = Math.random() * 100 + "vw";
+            confetti.style.width = Math.random() * 15 + 5 + "px";
+            confetti.style.height = confetti.style.width;
+            confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            confetti.style.animationDuration = Math.random() * 3 + 2 + "s";
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 3000);
+        }
+        alert("Congratulations! You've matched all pairs!");
+    }
+
+    document.getElementById("reset-button").addEventListener("click", () => {
+        shuffledSymbols = generateRandomShapesAndImages();
+        firstCard = null;
+        secondCard = null;
+        matchedPairs = 0;
+        createBoard();
+    });
+
+    createBoard();
+});
+</script>
+{% endblock %}
