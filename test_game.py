@@ -13,7 +13,7 @@ def setup_driver():
 # Test Case: Check if game loads
 def test_game_load():
     driver = setup_driver()
-    driver.get("http://127.0.0.1:5000")  # Update with your local Flask app URL
+    driver.get("https://levelup-n5hr.onrender.com")  # Update with your local Flask app URL
     time.sleep(2)
 
     assert "Game Title" in driver.title  # Change to your game’s title
