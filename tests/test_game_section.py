@@ -8,7 +8,6 @@ from selenium import webdriver
 
 BASE_URL = "https://levelupgames.onrender.com"
 
-@pytest.mark.dependency(name="test_game_section", depends=["test_game_load"])
 @pytest.fixture
 def driver():
     options = webdriver.ChromeOptions()

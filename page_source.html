@@ -1032,100 +1032,88 @@
     </footer>
 
     <script>
-        // Mobile menu functionality
-        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-        const navLinks = document.querySelector('.nav-links');
-        const mobileOverlay = document.querySelector('.mobile-overlay');
-        const closeMenuBtn = document.querySelector('.close-menu');
-
-        mobileMenuBtn.addEventListener('click', () => {
-            navLinks.classList.add('show');
-            mobileOverlay.classList.add('show');
-            document.body.style.overflow = 'hidden';
-        });
-
-        function closeMenu() {
-            navLinks.classList.remove('show');
-            mobileOverlay.classList.remove('show');
-            document.body.style.overflow = '';
-        }
-
-        closeMenuBtn.addEventListener('click', closeMenu);
-        mobileOverlay.addEventListener('click', closeMenu);
-
-        // Handle navigation and content sections
-        const homeNav = document.getElementById('home-nav');
-        const gamesNav = document.getElementById('games-nav');
-        const aboutNav = document.getElementById('about-nav');
-        
-        const homeSection = document.getElementById('home-section');
-        const gamesSection = document.getElementById('games-section');
-        const aboutSection = document.getElementById('about-section');
-        
-                
-
-        // Function to load external HTML content
-        function loadGamesContent() {
-            fetch('/games')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('games-section').innerHTML = data;
-                })
-                .catch(error => console.error('Error loading games.html:', error));
-        }
-
-        // Handle navigation and content sections
-        document.getElementById('games-nav').addEventListener('click', function () {
-            showSection('games');
-            loadGamesContent(); // Load the games dynamically
-        });
-
-        // Function to show the correct section
-        function showSection(section) {
-            document.querySelectorAll('.content-section').forEach(sectionEl => {
-                sectionEl.classList.remove('active');
-            });
-
-            document.querySelectorAll('.nav-links li').forEach(navEl => {
-                navEl.classList.remove('active');
-            });
-
-            document.getElementById(`${section}-section`).classList.add('active');
-            document.getElementById(`${section}-nav`).classList.add('active');
-        }
-
-        // Function to switch content sections
-        function showSection(section) {
-            // Hide all sections
-            homeSection.classList.remove('active');
-            gamesSection.classList.remove('active');
-            aboutSection.classList.remove('active');
-            
-            // Remove active class from all nav items
-            homeNav.classList.remove('active');
-            gamesNav.classList.remove('active');
-            aboutNav.classList.remove('active');
-            
-            // Show selected section and mark nav item as active
-            if (section === 'home') {
-                homeSection.classList.add('active');
-                homeNav.classList.add('active');
-            } else if (section === 'games') {
-                gamesSection.classList.add('active');
-                gamesNav.classList.add('active');
-            } else if (section === 'about') {
-                aboutSection.classList.add('active');
-                aboutNav.classList.add('active');
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mobile menu functionality
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+            const mobileOverlay = document.querySelector('.mobile-overlay');
+            const closeMenuBtn = document.querySelector('.close-menu');
+    
+            if (mobileMenuBtn && navLinks && mobileOverlay && closeMenuBtn) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    navLinks.classList.add('show');
+                    mobileOverlay.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                });
+    
+                function closeMenu() {
+                    navLinks.classList.remove('show');
+                    mobileOverlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+    
+                closeMenuBtn.addEventListener('click', closeMenu);
+                mobileOverlay.addEventListener('click', closeMenu);
             }
-            
-            // Close mobile menu if open
-            closeMenu();
-        }
-
-        homeNav.addEventListener('click', () => showSection('home'));
-        gamesNav.addEventListener('click', () => showSection('games'));
-        aboutNav.addEventListener('click', () => showSection('about'));
-
+    
+            // Navigation and content sections
+            const homeNav = document.getElementById('home-nav');
+            const gamesNav = document.getElementById('games-nav');
+            const aboutNav = document.getElementById('about-nav');
+    
+            const homeSection = document.getElementById('home-section');
+            const gamesSection = document.getElementById('games-section');
+            const aboutSection = document.getElementById('about-section');
+    
+            let gamesContentLoaded = false; // Prevent unnecessary reloads
+    
+            function loadGamesContent() {
+                if (gamesContentLoaded) return; // Skip fetching if already loaded
+    
+                fetch('/games')
+                    .then(response => response.text())
+                    .then(data => {
+                        gamesSection.innerHTML = data;
+                        gamesContentLoaded = true;
+                    })
+                    .catch(error => console.error('Error loading games.html:', error));
+            }
+    
+            function showSection(section) {
+                if (!homeSection || !gamesSection || !aboutSection) return;
+    
+                // Hide all sections
+                homeSection.classList.remove('active');
+                gamesSection.classList.remove('active');
+                aboutSection.classList.remove('active');
+    
+                // Remove active class from all nav items
+                homeNav?.classList.remove('active');
+                gamesNav?.classList.remove('active');
+                aboutNav?.classList.remove('active');
+    
+                // Show selected section and mark nav item as active
+                if (section === 'home') {
+                    homeSection.classList.add('active');
+                    homeNav?.classList.add('active');
+                } else if (section === 'games') {
+                    gamesSection.classList.add('active');
+                    gamesNav?.classList.add('active');
+                    loadGamesContent(); // Load games only if selected
+                } else if (section === 'about') {
+                    aboutSection.classList.add('active');
+                    aboutNav?.classList.add('active');
+                }
+    
+                // Close mobile menu if open
+                closeMenu?.();
+            }
+    
+            homeNav?.addEventListener('click', () => showSection('home'));
+            gamesNav?.addEventListener('click', () => showSection('games'));
+            aboutNav?.addEventListener('click', () => showSection('about'));
+        });
     </script>
+    
 
 </body></html>
