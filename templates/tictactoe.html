@@ -1,0 +1,255 @@
+{% extends "layout.html" %}
+
+{% block title %}Tic Tac Toe - LetsChiLL{% endblock %}
+
+{% block game_title %}Tic Tac Toe{% endblock %}
+{% block game_description %}Play the classic game of X's and O's. Get three in a row to win!{% endblock %}
+
+{% block additional_styles %}
+
+<style>
+.ttt-board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 10px;
+    margin: 2rem auto;
+    max-width: 320px;
+}
+
+.ttt-cell {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ttt-cell:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 8px -2px rgba(0, 0, 0, 0.15);
+}
+
+.ttt-cell[data-player="X"] {
+    color: var(--primary);
+}
+
+.ttt-cell[data-player="O"] {
+    color: var(--secondary);
+}
+
+.game-status {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    height: 2rem;
+    margin-bottom: 1rem;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.reset-button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.reset-button:hover {
+    background-color: var(--primary-dark);
+}
+
+.winning-line {
+    position: relative;
+}
+
+.winning-line::before {
+    content: '';
+    position: absolute;
+    background-color: rgba(99, 102, 241, 0.3);
+    z-index: 1;
+}
+
+.winning-line.horizontal::before {
+    height: 10px;
+    width: 100%;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.winning-line.vertical::before {
+    width: 10px;
+    height: 100%;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+}
+
+.winning-line.diagonal-1::before {
+    height: 10px;
+    width: 140%;
+    top: 50%;
+    left: -20%;
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.winning-line.diagonal-2::before {
+    height: 10px;
+    width: 140%;
+    top: 50%;
+    left: -20%;
+    transform: translateY(-50%) rotate(-45deg);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="game-status" id="ttt-status">X's turn</div>
+
+<div class="ttt-board" id="ttt-board">
+    <div class="ttt-cell" data-index="0"></div>
+    <div class="ttt-cell" data-index="1"></div>
+    <div class="ttt-cell" data-index="2"></div>
+    <div class="ttt-cell" data-index="3"></div>
+    <div class="ttt-cell" data-index="4"></div>
+    <div class="ttt-cell" data-index="5"></div>
+    <div class="ttt-cell" data-index="6"></div>
+    <div class="ttt-cell" data-index="7"></div>
+    <div class="ttt-cell" data-index="8"></div>
+</div>
+
+<div class="game-controls">
+    <button class="reset-button" id="ttt-reset">Reset Game</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tttBoard = document.getElementById('ttt-board');
+        const tttCells = document.querySelectorAll('.ttt-cell');
+        const tttStatus = document.getElementById('ttt-status');
+        const tttReset = document.getElementById('ttt-reset');
+        
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let gameState = ['', '', '', '', '', '', '', '', ''];
+        
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+            [0, 4, 8], [2, 4, 6]            // diagonals
+        ];
+        
+        function handleCellClick(event) {
+            const clickedCell = event.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+            
+            if (gameState[clickedCellIndex] !== '' || !gameActive) {
+                return;
+            }
+            
+            gameState[clickedCellIndex] = currentPlayer;
+            clickedCell.textContent = currentPlayer;
+            clickedCell.setAttribute('data-player', currentPlayer);
+            
+            checkWin();
+        }
+        
+        function checkWin() {
+            let roundWon = false;
+            let winningLine = null;
+            
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [a, b, c] = winningConditions[i];
+                if (gameState[a] === '' || gameState[b] === '' || gameState[c] === '') {
+                    continue;
+                }
+                if (gameState[a] === gameState[b] && gameState[b] === gameState[c]) {
+                    roundWon = true;
+                    winningLine = i;
+                    break;
+                }
+            }
+            
+            if (roundWon) {
+                highlightWinningLine(winningLine);
+                tttStatus.textContent = `${currentPlayer} wins!`;
+                gameActive = false;
+                return;
+            }
+            
+            const roundDraw = !gameState.includes('');
+            if (roundDraw) {
+                tttStatus.textContent = 'Game ended in a draw!';
+                gameActive = false;
+                return;
+            }
+            
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            tttStatus.textContent = `${currentPlayer}'s turn`;
+        }
+        
+        function highlightWinningLine(index) {
+            const [a, b, c] = winningConditions[index];
+            const cells = document.querySelectorAll('.ttt-cell');
+            
+            // Determine line type
+            if (index < 3) {
+                // Horizontal
+                cells[a].classList.add('winning-line', 'horizontal');
+                cells[b].classList.add('winning-line', 'horizontal');
+                cells[c].classList.add('winning-line', 'horizontal');
+            } else if (index < 6) {
+                // Vertical
+                cells[a].classList.add('winning-line', 'vertical');
+                cells[b].classList.add('winning-line', 'vertical');
+                cells[c].classList.add('winning-line', 'vertical');
+            } else if (index === 6) {
+                // Diagonal \
+                cells[a].classList.add('winning-line', 'diagonal-1');
+                cells[b].classList.add('winning-line', 'diagonal-1');
+                cells[c].classList.add('winning-line', 'diagonal-1');
+            } else {
+                // Diagonal /
+                cells[a].classList.add('winning-line', 'diagonal-2');
+                cells[b].classList.add('winning-line', 'diagonal-2');
+                cells[c].classList.add('winning-line', 'diagonal-2');
+            }
+        }
+        
+        function resetTttGame() {
+            gameActive = true;
+            currentPlayer = 'X';
+            gameState = ['', '', '', '', '', '', '', '', ''];
+            tttStatus.textContent = `${currentPlayer}'s turn`;
+            
+            tttCells.forEach(cell => {
+                cell.textContent = '';
+                cell.setAttribute('data-player', '');
+                cell.classList.remove('winning-line', 'horizontal', 'vertical', 'diagonal-1', 'diagonal-2');
+            });
+        }
+        
+        tttCells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+        
+        tttReset.addEventListener('click', resetTttGame);
+    });
+</script>
+{% endblock %}

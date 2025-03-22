@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error {{ error }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .error-container {
+            margin: 50px 0;
+        }
+        .error-code {
+            font-size: 72px;
+            color: #a94442;
+        }
+        .home-link {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code">{{ error }}</div>
+        <h1>{{ message }}</h1>
+        <div class="home-link">
+            <a href="{{ url_for('index') }}">Return to Home</a>
+        </div>
+    </div>
+</body>
+</html>

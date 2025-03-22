@@ -1,0 +1,364 @@
+{% extends "layout.html" %}
+
+{% block title %}Number Guessing Game - LetsChiLL{% endblock %}
+
+{% block game_title %}Number Guessing Game{% endblock %}
+{% block game_description %}Try to guess the number between 1 and 100! See how many attempts it takes you to win.{% endblock %}
+
+{% block additional_styles %}
+<style>
+.number-game-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.guess-form {
+    margin: 2rem 0;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Added for better mobile responsiveness */
+}
+
+.guess-input {
+    padding: 0.75rem 1rem;
+    font-size: 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.8);
+    width: 120px;
+    text-align: center;
+}
+
+/* Added focus state for better accessibility */
+.guess-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+.guess-button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.guess-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.guess-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+.guess-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7; /* Added for better visual feedback */
+}
+
+.game-status {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    min-height: 2rem; /* Changed from fixed height for better content handling */
+    margin-bottom: 1rem;
+}
+
+.message {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease-in; /* Added animation for better UX */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.success {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: rgb(21, 128, 61);
+}
+
+.error {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: rgb(185, 28, 28);
+}
+
+.info {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: rgb(29, 78, 216);
+}
+
+.guess-history {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out; /* Added animation */
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.guess-history h2 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.guess-history p {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.reset-button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem; /* Added spacing */
+}
+
+.reset-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.reset-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+/* Added loading state styles */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Added responsive adjustments */
+@media (max-width: 480px) {
+    .guess-form {
+        flex-direction: column;
+    }
+    
+    .guess-input {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .guess-button {
+        width: 100%;
+        max-width: 200px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="number-game-container">
+    <div id="message-container" role="alert" aria-live="polite"></div>
+
+    <form class="guess-form" id="guess-form" onsubmit="return false;">
+        <input 
+            type="number" 
+            id="guess-input" 
+            class="guess-input" 
+            min="1" 
+            max="100" 
+            required
+            aria-label="Enter your guess"
+            placeholder="1-100"
+        >
+        <button 
+            id="guess-button" 
+            class="guess-button"
+            type="submit"
+            aria-label="Submit guess"
+        >
+            Guess!
+        </button>
+    </form>
+
+    <div 
+        class="guess-history" 
+        id="guess-history" 
+        style="display: none;"
+        role="status"
+        aria-live="polite"
+    >
+        <h2>Your Guesses</h2>
+        <p>Number of attempts: <span id="attempts">0</span></p>
+        <p>Previous guesses: <span id="guesses"></span></p>
+    </div>
+
+    <button 
+        id="reset-button" 
+        class="reset-button" 
+        style="display: none;"
+        aria-label="Start new game"
+    >
+        Play Again
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let secretNumber;
+        let attempts = 0;
+        let guesses = [];
+        let gameWon = false;
+        let isLoading = false;
+
+        function setLoading(loading) {
+            isLoading = loading;
+            const guessButton = document.getElementById('guess-button');
+            const guessInput = document.getElementById('guess-input');
+            const resetButton = document.getElementById('reset-button');
+            
+            [guessButton, guessInput, resetButton].forEach(element => {
+                if (element) {
+                    element.disabled = loading;
+                    element.classList.toggle('loading', loading);
+                }
+            });
+        }
+
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('message-container');
+            messageContainer.innerHTML = `
+                <div class="message ${type}">
+                    ${message}
+                </div>
+            `;
+        }
+
+        function updateGuessHistory() {
+            const guessHistory = document.getElementById('guess-history');
+            if (attempts > 0) {
+                guessHistory.style.display = 'block';
+                document.getElementById('attempts').textContent = attempts;
+                document.getElementById('guesses').textContent = guesses.join(', ');
+            }
+        }
+
+        async function checkGuess(guess) {
+            if (isLoading) return;
+            
+            setLoading(true);
+            try {
+                const response = await fetch('/check_guess', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        guess: guess,
+                        secret: secretNumber
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                
+                attempts++;
+                guesses.push(guess);
+                updateGuessHistory();
+                
+                showMessage(data.message, data.correct ? 'success' : 'info');
+                
+                if (data.correct) {
+                    gameWon = true;
+                    document.getElementById('guess-input').disabled = true;
+                    document.getElementById('guess-button').disabled = true;
+                    document.getElementById('reset-button').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('An error occurred. Please try again.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function startNewGame() {
+            if (isLoading) return;
+            
+            setLoading(true);
+            try {
+                const response = await fetch('/get_random_number');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                secretNumber = data.number;
+                
+                attempts = 0;
+                guesses = [];
+                gameWon = false;
+                
+                const guessInput = document.getElementById('guess-input');
+                guessInput.value = '';
+                guessInput.disabled = false;
+                guessInput.focus();
+                
+                const guessButton = document.getElementById('guess-button');
+                guessButton.disabled = false;
+                
+                document.getElementById('reset-button').style.display = 'none';
+                document.getElementById('message-container').innerHTML = '';
+                document.getElementById('guess-history').style.display = 'none';
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Failed to start new game. Please refresh the page.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        document.getElementById('guess-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const guessInput = document.getElementById('guess-input');
+            const guess = parseInt(guessInput.value);
+            
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                showMessage('Please enter a valid number between 1 and 100.', 'error');
+                return;
+            }
+            
+            checkGuess(guess);
+            guessInput.value = '';
+        });
+
+        document.getElementById('reset-button').addEventListener('click', startNewGame);
+
+        // Initialize game
+        startNewGame();
+    });
+</script>
+{% endblock %}

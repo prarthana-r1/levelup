@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games Collection - LetsChiLL</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #a78bfa, #3b82f6, #6366f1);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--dark);
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        header {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary-dark), var(--secondary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .main-container {
+            flex: 1;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2.5rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary-dark), var(--secondary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Fixed button styling to ensure they're visible */
+        .cta-button {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background-color: #6366f1; /* Using direct color instead of variable */
+            color: #ffffff !important; /* Force white text */
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: none;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .cta-button:hover {
+            background-color: #4f46e5; /* Using direct color instead of variable */
+            transform: translateY(-2px);
+        }
+
+        /* Updated streak container to ensure visibility */
+        .streak-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid rgba(255, 215, 0, 0.6);
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #000000; /* Changed to black for better visibility */
+            text-align: center;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: auto;
+            min-width: 250px;
+        }
+
+        .streak-container i {
+            color: #FF4500;
+            font-size: 1.8rem;
+            margin-right: 12px;
+        }
+
+        /* Fixed streak count spacing */
+        #streak-count {
+            margin: 0 5px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 1s ease-in-out;
+        }
+
+        .games-heading {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--light);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .games-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .game-card {
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            height: 100%;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .game-card__image {
+            height: 180px;
+            background-position: center;
+            background-size: cover;
+            position: relative;
+        }
+
+        .game-card__image::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        }
+
+        .game-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 3rem;
+            height: 3rem;
+            background-color: #6366f1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        /* Fixed Image Placeholders with direct URLs */
+        .tictactoe-bg {
+            background-color: #c7d2fe;
+            background-image: url('/api/placeholder/400/300?text=Tic+Tac+Toe');
+        }
+
+        .wordguess-bg {
+            background-color: #bfdbfe;
+            background-image: url('/api/placeholder/400/300?text=Word+Guess');
+        }
+
+        .numberguess-bg {
+            background-color: #ddd6fe;
+            background-image: url('/api/placeholder/400/300?text=Number+Guess');
+        }
+
+        .game-card__content {
+            padding: 1.8rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card__title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: #4f46e5;
+        }
+
+        .game-card__description {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: #64748b;
+            flex: 1;
+        }
+
+        .game-card__meta {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .game-card__meta i {
+            margin-right: 0.5rem;
+        }
+
+        .game-card__meta span {
+            margin-right: 1rem;
+        }
+
+        /* Fixed card button styling */
+        .game-card__button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: #6366f1;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.2s;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .game-card__button:hover {
+            background-color: #4f46e5;
+            transform: translateY(-2px);
+        }
+        
+        footer {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2rem 0;
+            margin-top: 4rem;
+            box-shadow: 0 -10px 15px -3px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0 1.5rem;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #4f46e5, #ec4899);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: #64748b;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #6366f1;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-icons a {
+            color: #64748b;
+            font-size: 1.5rem;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .social-icons a:hover {
+            color: #6366f1;
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .games-container {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+   
+    
+    <div class="main-container">
+        <section class="hero" aria-labelledby="games-title">
+            <h1 id="games-title">Discover Fun Games</h1>
+            <p>Challenge yourself with our collection of entertaining games designed for players of all ages. Keep your mind sharp and have fun!</p>
+            <button class="cta-button" onclick="location.href='#games'">Explore Games</button>
+        </section>
+
+        <div class="streak-container" id="streak-box">
+            <i class="fas fa-fire"></i> Current Streak: <span id="streak-count">0</span> days
+        </div>
+
+        <h2 class="games-heading" id="games">Popular Games</h2>
+        
+        <div class="games-container">
+            <!-- Tic Tac Toe Card -->
+            <div class="game-card">
+                <div class="game-card__image tictactoe-bg"></div>
+                <div class="game-icon">
+                    <i class="fas fa-th"></i>
+                </div>
+                <div class="game-card__content">
+                    <h3 class="game-card__title">Tic Tac Toe</h3>
+                    <div class="game-card__meta">
+                        <i class="fas fa-users"></i>
+                        <span>2 Players</span>
+                        <i class="fas fa-clock"></i>
+                        <span>5 min</span>
+                    </div>
+                    <p class="game-card__description">The classic game of X's and O's. Play against a friend or challenge the computer. Will you be the first to get three in a row?</p>
+                    <button class="game-card__button" onclick="location.href='/tictactoe'">Play Now</button>
+                </div>
+            </div>
+            
+            <!-- Word Guess Card -->
+            <div class="game-card">
+                <div class="game-card__image wordguess-bg"></div>
+                <div class="game-icon">
+                    <i class="fas fa-font"></i>
+                </div>
+                <div class="game-card__content">
+                    <h3 class="game-card__title">Word Guess</h3>
+                    <div class="game-card__meta">
+                        <i class="fas fa-user"></i>
+                        <span>Single Player</span>
+                        <i class="fas fa-clock"></i>
+                        <span>10 min</span>
+                    </div>
+                    <p class="game-card__description">Test your vocabulary and word recognition skills! Can you identify the hidden word from limited clues before running out of attempts?</p>
+                    <button class="game-card__button" onclick="location.href='/guessword'">Play Now</button>
+                </div>
+            </div>
+            
+            <!-- Number Guess Card -->
+            <div class="game-card">
+                <div class="game-card__image numberguess-bg"></div>
+                <div class="game-icon">
+                    <i class="fas fa-dice"></i>
+                </div>
+                <div class="game-card__content">
+                    <h3 class="game-card__title">Number Guess</h3>
+                    <div class="game-card__meta">
+                        <i class="fas fa-user"></i>
+                        <span>Single Player</span>
+                        <i class="fas fa-clock"></i>
+                        <span>5 min</span>
+                    </div>
+                    <p class="game-card__description">Put your logic skills to the test! Try to guess the secret number in as few attempts as possible. Will you crack the code?</p>
+                    <button class="game-card__button" onclick="location.href='/numberguess'">Play Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  
+
+    <script>
+        // Improved streak functionality with debug logging
+        function updateStreak() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const lastVisit = localStorage.getItem('lastStreakDate');
+                let currentStreak = parseInt(localStorage.getItem('streak')) || 0;
+                
+                console.log("Streak update - Today:", today, "Last visit:", lastVisit, "Current streak:", currentStreak);
+                
+                if (!lastVisit) {
+                    // First visit
+                    currentStreak = 1;
+                    localStorage.setItem('streak', currentStreak);
+                    localStorage.setItem('lastStreakDate', today);
+                    console.log("First visit - New streak:", currentStreak);
+                } else if (lastVisit !== today) {
+                    const lastDate = new Date(lastVisit);
+                    const currentDate = new Date(today);
+                    
+                    // Calculate difference in days
+                    const timeDiff = currentDate.getTime() - lastDate.getTime();
+                    const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+                    
+                    console.log("Days difference:", daysDiff);
+                    
+                    if (daysDiff === 1) {
+                        // Consecutive day
+                        currentStreak += 1;
+                        console.log("Consecutive day - New streak:", currentStreak);
+                    } else if (daysDiff > 1) {
+                        // Streak broken
+                        currentStreak = 1;
+                        console.log("Streak broken - Reset to:", currentStreak);
+                    }
+                    
+                    localStorage.setItem('streak', currentStreak);
+                    localStorage.setItem('lastStreakDate', today);
+                }
+                
+                // Ensure streak element exists before updating
+                const streakElement = document.getElementById('streak-count');
+                if (streakElement) {
+                    streakElement.textContent = currentStreak;
+                    console.log("Updated streak display to:", currentStreak);
+                } else {
+                    console.error("Streak element not found!");
+                }
+                
+                // Add animation if streak increased
+                if (currentStreak > 1) {
+                    const streakBox = document.getElementById('streak-box');
+                    if (streakBox) {
+                        streakBox.classList.add('pulse');
+                        setTimeout(() => {
+                            streakBox.classList.remove('pulse');
+                        }, 1000);
+                    }
+                }
+            } catch (error) {
+                console.error("Error updating streak:", error);
+            }
+        }
+        
+        // Run streak update when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', updateStreak);
+        } else {
+            // DOM already loaded, run immediately
+            updateStreak();
+        }
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,616 @@
+{% extends "layout.html" %}
+
+{% block title %}Guess the Word - LetsChiLL{% endblock %}
+
+{% block game_title %}Guess the Word{% endblock %}
+{% block game_description %}Try to guess the hidden word using the clues provided. See how quickly you can figure it out!{% endblock %}
+
+{% block additional_styles %}
+<style>
+.word-game-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.clue-container {
+    margin: 1.5rem auto;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.clue-list {
+    text-align: left;
+    padding-left: 1.5rem;
+}
+
+.clue-item {
+    margin: 0.75rem 0;
+    font-size: 1.1rem;
+    animation: fadeIn 0.3s ease-in;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.clue-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.guess-form {
+    margin: 2rem 0;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.guess-input {
+    padding: 0.75rem 1rem;
+    font-size: 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.8);
+    width: 200px;
+    text-align: center;
+}
+
+.guess-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+.guess-button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.guess-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.guess-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+.guess-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+}
+
+.hint-button {
+    padding: 0.5rem 1rem;
+    background-color: rgba(var(--primary-rgb), 0.2);
+    color: var(--primary-dark);
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+}
+
+.hint-button:hover {
+    background-color: rgba(var(--primary-rgb), 0.3);
+}
+
+.hint-button:disabled {
+    background-color: #eee;
+    border-color: #ccc;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.game-status {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    min-height: 2rem;
+    margin-bottom: 1rem;
+}
+
+.message {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.success {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: rgb(21, 128, 61);
+}
+
+.error {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: rgb(185, 28, 28);
+}
+
+.info {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: rgb(29, 78, 216);
+}
+
+.guess-history {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.guess-history h2 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.guess-history p {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.reset-button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+}
+
+.reset-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.reset-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.word-hint {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    letter-spacing: 0.5rem;
+}
+
+@media (max-width: 480px) {
+    .guess-form {
+        flex-direction: column;
+    }
+    
+    .guess-input {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .guess-button {
+        width: 100%;
+        max-width: 200px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="word-game-container">
+    <div id="message-container" role="alert" aria-live="polite"></div>
+
+    <div 
+        class="clue-container" 
+        id="clue-container"
+        aria-live="polite"
+    >
+        <h2>Clues</h2>
+        <ul class="clue-list" id="clue-list"></ul>
+        <div id="word-hint" class="word-hint" style="display: none;"></div>
+    </div>
+
+    <button 
+        id="hint-button" 
+        class="hint-button"
+        aria-label="Get another clue"
+    >
+        Get Another Clue
+    </button>
+
+    <form class="guess-form" id="guess-form" onsubmit="return false;">
+        <input 
+            type="text" 
+            id="guess-input" 
+            class="guess-input" 
+            required
+            aria-label="Enter your guess"
+            placeholder="Type your guess here"
+        >
+        <button 
+            id="guess-button" 
+            class="guess-button"
+            type="submit"
+            aria-label="Submit guess"
+        >
+            Guess!
+        </button>
+    </form>
+
+    <div 
+        class="guess-history" 
+        id="guess-history" 
+        style="display: none;"
+        role="status"
+        aria-live="polite"
+    >
+        <h2>Your Guesses</h2>
+        <p>Number of attempts: <span id="attempts">0</span></p>
+        <p>Previous guesses: <span id="guesses"></span></p>
+    </div>
+
+    <button 
+        id="reset-button" 
+        class="reset-button" 
+        style="display: none;"
+        aria-label="Start new game"
+    >
+        Play Again
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Game variables
+        let secretWord = '';
+        let clues = [];
+        let attempts = 0;
+        let guesses = [];
+        let gameWon = false;
+        let isLoading = false;
+        let revealedClues = 0;
+        let maxClues = 0;
+        let maxAttempts = 5;
+
+        // Word list with clues
+        const wordList = [
+            {
+                word: "python",
+                clues: [
+                    "It's a programming language",
+                    "It's also a type of snake",
+                    "It starts with 'P'",
+                    "It has 6 letters"
+                ]
+            },
+            {
+                word: "coffee",
+                clues: [
+                    "It's a popular beverage",
+                    "Many people drink it in the morning",
+                    "It contains caffeine",
+                    "It starts with 'C'"
+                ]
+            },
+            {
+                word: "elephant",
+                clues: [
+                    "It's an animal",
+                    "It has a trunk",
+                    "It's the largest land mammal",
+                    "It starts with 'E'"
+                ]
+            },
+            {
+                word: "keyboard",
+                clues: [
+                    "You use it every day",
+                    "It has many buttons",
+                    "It's used for typing",
+                    "It starts with 'K'"
+                ]
+            },
+            {
+                word: "diamond",
+                clues: [
+                    "It's a valuable gem",
+                    "It's made of carbon",
+                    "It's extremely hard",
+                    "It starts with 'D'"
+                ]
+            },
+            {
+                word: "library",
+                clues: [
+                    "It's a place",
+                    "It contains many books",
+                    "It's quiet",
+                    "It starts with 'L'"
+                ]
+            },
+            {
+                word: "sunflower",
+                clues: [
+                    "It's a plant",
+                    "It's yellow",
+                    "It follows the sun",
+                    "It starts with 'S'"
+                ]
+            },
+            {
+                word: "bicycle",
+                clues: [
+                    "It's a vehicle",
+                    "It has two wheels",
+                    "You pedal it",
+                    "It starts with 'B'"
+                ]
+            },
+            {
+                word: "ocean",
+                clues: [
+                    "It contains salt water",
+                    "It covers most of Earth",
+                    "It has waves",
+                    "It starts with 'O'"
+                ]
+            },
+            {
+                word: "volcano",
+                clues: [
+                    "It's a geological feature",
+                    "It can erupt",
+                    "It contains magma",
+                    "It starts with 'V'"
+                ]
+            }
+        ];
+
+        function setLoading(loading) {
+            isLoading = loading;
+            const guessButton = document.getElementById('guess-button');
+            const guessInput = document.getElementById('guess-input');
+            const resetButton = document.getElementById('reset-button');
+            const hintButton = document.getElementById('hint-button');
+            
+            [guessButton, guessInput, resetButton, hintButton].forEach(element => {
+                if (element) {
+                    element.disabled = loading;
+                    element.classList.toggle('loading', loading);
+                }
+            });
+        }
+
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('message-container');
+            messageContainer.innerHTML = `
+                <div class="message ${type}">
+                    ${message}
+                </div>
+            `;
+        }
+
+        function updateGuessHistory() {
+            const guessHistory = document.getElementById('guess-history');
+            if (attempts > 0) {
+                guessHistory.style.display = 'block';
+                document.getElementById('attempts').textContent = attempts;
+                document.getElementById('guesses').textContent = guesses.join(', ');
+            }
+        }
+
+        function revealClue() {
+            if (revealedClues >= maxClues) {
+                document.getElementById('hint-button').disabled = true;
+                return;
+            }
+            
+            const clueList = document.getElementById('clue-list');
+            const clueItem = document.createElement('li');
+            clueItem.textContent = clues[revealedClues];
+            clueItem.className = 'clue-item';
+            clueList.appendChild(clueItem);
+            
+            // Force reflow to trigger animation
+            void clueItem.offsetWidth;
+            clueItem.classList.add('visible');
+            
+            revealedClues++;
+            
+            // Disable hint button if all clues are revealed
+            if (revealedClues >= maxClues) {
+                document.getElementById('hint-button').disabled = true;
+            }
+        }
+
+        function revealWordHint() {
+            const wordHint = document.getElementById('word-hint');
+            wordHint.style.display = 'block';
+            
+            let hintDisplay = '';
+            for (let i = 0; i < secretWord.length; i++) {
+                if (i === 0 || i === secretWord.length - 1) {
+                    hintDisplay += secretWord[i].toUpperCase() + ' ';
+                } else {
+                    hintDisplay += '_ ';
+                }
+            }
+            
+            wordHint.textContent = hintDisplay.trim();
+        }
+
+        function checkGuess(guess) {
+            if (isLoading) return;
+            
+            if (!guess || guess.trim() === '') {
+                showMessage('Please enter a valid guess.', 'error');
+                return;
+            }
+            
+            const normalizedGuess = guess.toLowerCase().trim();
+            const normalizedSecret = secretWord.toLowerCase();
+            
+            attempts++;
+            guesses.push(normalizedGuess);
+            updateGuessHistory();
+            
+            if (normalizedGuess === normalizedSecret) {
+                // Correct guess
+                gameWon = true;
+                const scoreValue = (maxAttempts - attempts + 1) * 20;
+                showMessage(`Correct! The word is "${secretWord}". You earned ${scoreValue} points!`, 'success');
+                document.getElementById('guess-input').disabled = true;
+                document.getElementById('guess-button').disabled = true;
+                document.getElementById('hint-button').disabled = true;
+                document.getElementById('reset-button').style.display = 'block';
+            } else {
+                // Incorrect guess
+                if (attempts >= maxAttempts) {
+                    // Game over
+                    showMessage(`Sorry, you've used all your attempts. The word was "${secretWord}".`, 'error');
+                    document.getElementById('guess-input').disabled = true;
+                    document.getElementById('guess-button').disabled = true;
+                    document.getElementById('hint-button').disabled = true;
+                    document.getElementById('reset-button').style.display = 'block';
+                } else {
+                    // Provide feedback
+                    let feedback = 'That\'s not correct. ';
+                    
+                    // Check common letters
+                    const guessSet = new Set(normalizedGuess.split(''));
+                    const secretSet = new Set(normalizedSecret.split(''));
+                    const commonLetters = [...guessSet].filter(letter => secretSet.has(letter));
+                    
+                    if (commonLetters.length > 0) {
+                        feedback += `Your guess shares ${commonLetters.length} letter(s) with the secret word.`;
+                    } else {
+                        feedback += 'No letters in common.';
+                    }
+                    
+                    showMessage(feedback, 'info');
+                    
+                    // Reveal a new clue if available
+                    if (attempts === Math.ceil(maxAttempts / 2)) {
+                        revealWordHint();
+                    }
+                    
+                    if (revealedClues < maxClues && attempts >= 2) {
+                        revealClue();
+                    }
+                }
+            }
+        }
+
+        function startNewGame() {
+            if (isLoading) return;
+            
+            setLoading(true);
+            
+            try {
+                // Select a random word
+                const randomIndex = Math.floor(Math.random() * wordList.length);
+                const wordData = wordList[randomIndex];
+                
+                secretWord = wordData.word;
+                clues = wordData.clues;
+                maxClues = clues.length;
+                
+                attempts = 0;
+                guesses = [];
+                gameWon = false;
+                revealedClues = 0;
+                
+                // Clear UI
+                const clueList = document.getElementById('clue-list');
+                clueList.innerHTML = '';
+                
+                const wordHint = document.getElementById('word-hint');
+                wordHint.style.display = 'none';
+                wordHint.textContent = '';
+                
+                const guessInput = document.getElementById('guess-input');
+                guessInput.value = '';
+                guessInput.disabled = false;
+                guessInput.focus();
+                
+                const guessButton = document.getElementById('guess-button');
+                guessButton.disabled = false;
+                
+                const hintButton = document.getElementById('hint-button');
+                hintButton.disabled = false;
+                
+                document.getElementById('reset-button').style.display = 'none';
+                document.getElementById('message-container').innerHTML = '';
+                document.getElementById('guess-history').style.display = 'none';
+                
+                // Show first clue
+                revealClue();
+                
+                showMessage(`New game started! Try to guess the word using the clues. You have ${maxAttempts} attempts.`, 'info');
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Failed to start new game. Please refresh the page.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('guess-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const guessInput = document.getElementById('guess-input');
+            const guess = guessInput.value;
+            
+            checkGuess(guess);
+            guessInput.value = '';
+            guessInput.focus();
+        });
+
+        document.getElementById('hint-button').addEventListener('click', function() {
+            if (revealedClues < maxClues) {
+                revealClue();
+            } else {
+                this.disabled = true;
+            }
+        });
+
+        document.getElementById('reset-button').addEventListener('click', startNewGame);
+
+        // Initialize game
+        startNewGame();
+    });
+</script>
+{% endblock %}
