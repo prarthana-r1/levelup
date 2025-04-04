@@ -119,6 +119,71 @@
             cursor: pointer;
         }
         
+        /* Profile dropdown styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+            margin-left: 1rem;
+        }
+
+        .profile-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: var(--dark);
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            color: var(--primary);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            box-shadow: var(--shadow);
+            list-style: none;
+            padding: 0.5rem 0;
+            border-radius: 5px;
+            z-index: 1000;
+            min-width: 150px;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu li {
+            padding: 0;
+        }
+
+        .dropdown-menu li a {
+            color: var(--dark);
+            text-decoration: none;
+            font-size: 1rem;
+            display: block;
+            padding: 0.5rem 1rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .dropdown-menu li a:hover {
+            color: var(--primary);
+            background-color: #f5f5f5;
+        }
+        
+        .username-display {
+            padding: 0.75rem 1rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+            background-color: #f0f4ff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
         .main-container {
             flex: 1;
             max-width: 1200px;
@@ -246,6 +311,8 @@
             color: var(--gray);
             font-size: 0.9rem;
         }
+
+        
         
         @media (max-width: 768px) {
             /* Mobile navigation */
@@ -299,63 +366,9 @@
                 color: var(--dark);
                 cursor: pointer;
             }
-
-        .streak-container {
-            text-align: center;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            margin-bottom: 1rem;
-        }
-
-        .streak-btn {
-            background: var(--secondary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-
-        .streak-btn:hover {
-            background: var(--primary-dark);
-        }
         }
     </style>
-    <script>
-        async function updateStreak() {
-            try {
-                const response = await fetch('/get_streak');
-                if (!response.ok) throw new Error('Failed to fetch streak data');
-                
-                const data = await response.json();
-                document.getElementById('streak-display').innerText = `Current Streak: ${data.streak}🔥`;
-                document.getElementById('longest-streak').innerText = `Longest Streak: ${data.longest_streak}🏆`;
-            } catch (error) {
-                console.error("Error fetching streak:", error);
-            }
-        }
-        
-        window.onload = updateStreak;
-
-        // Mobile menu toggle
-        document.addEventListener("DOMContentLoaded", function() {
-            const mobileBtn = document.querySelector(".mobile-menu-btn");
-            const navLinks = document.querySelector(".nav-links");
-            const closeBtn = document.querySelector(".close-menu");
-
-            mobileBtn.addEventListener("click", () => {
-                navLinks.classList.toggle("show");
-            });
-
-            closeBtn.addEventListener("click", () => {
-                navLinks.classList.remove("show");
-            });
-        });
-    </script>
+   
 </head>
 <body>
     <header>
@@ -370,6 +383,16 @@
                 <li id="about-nav"><a href="#about">About</a></li>
                 <li class="close-menu"><i class="fas fa-times"></i></li>
             </ul>
+            <div class="profile-dropdown">
+                <button class="profile-btn" id="profile-btn">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                <ul class="dropdown-menu" id="dropdown-menu">
+                    <li class="username-display">Hi, <span id="username">User</span></li>
+                    <li><a href="#" id="logout-btn">Logout</a></li>
+                </ul>
+            </div>
+            
             <button class="mobile-menu-btn">
                 <i class="fas fa-bars"></i>
             </button>
@@ -451,11 +474,22 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Check authentication and get user details
+            checkAuthentication();
+
             // Mobile menu functionality
             const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
             const navLinks = document.querySelector('.nav-links');
             const mobileOverlay = document.querySelector('.mobile-overlay');
             const closeMenuBtn = document.querySelector('.close-menu');
+    
+            function closeMenu() {
+                if (navLinks && mobileOverlay) {
+                    navLinks.classList.remove('show');
+                    mobileOverlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            }
     
             if (mobileMenuBtn && navLinks && mobileOverlay && closeMenuBtn) {
                 mobileMenuBtn.addEventListener('click', () => {
@@ -463,12 +497,6 @@
                     mobileOverlay.classList.add('show');
                     document.body.style.overflow = 'hidden';
                 });
-    
-                function closeMenu() {
-                    navLinks.classList.remove('show');
-                    mobileOverlay.classList.remove('show');
-                    document.body.style.overflow = '';
-                }
     
                 closeMenuBtn.addEventListener('click', closeMenu);
                 mobileOverlay.addEventListener('click', closeMenu);
@@ -524,14 +552,95 @@
                 }
     
                 // Close mobile menu if open
-                closeMenu?.();
+                closeMenu();
             }
     
             homeNav?.addEventListener('click', () => showSection('home'));
             gamesNav?.addEventListener('click', () => showSection('games'));
             aboutNav?.addEventListener('click', () => showSection('about'));
+
+            // Authentication check and user info display
+            function checkAuthentication() {
+    const token = localStorage.getItem("token");
+    
+    // If no token, redirect to login
+    if (!token) {
+        window.location.href = "login";
+        return;
+    }
+    
+    // Try to get user data from localStorage or token
+    try {
+        const usernameElement = document.getElementById('username');
+        
+        // First try to get user data from userData in localStorage
+        const userData = localStorage.getItem("userData");
+        if (userData) {
+            const user = JSON.parse(userData);
+            if (typeof user === 'object') {
+                usernameElement.textContent = user.name || "User";
+                return;
+            }
+        }
+        
+        // If userData isn't available or isn't an object, try to extract from token
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+            try {
+                const payload = JSON.parse(atob(tokenParts[1]));
+                console.log("Token payload:", payload);
+                
+                if (payload.sub && typeof payload.sub === 'object') {
+                    usernameElement.textContent = payload.sub.name || "User";
+                    // Store for future use
+                    localStorage.setItem("userData", JSON.stringify(payload.sub));
+                } else {
+                    usernameElement.textContent = "User";
+                }
+            } catch (e) {
+                console.error("Error parsing token:", e);
+                usernameElement.textContent = "User";
+            }
+        } else {
+            usernameElement.textContent = "User";
+        }
+    } catch (error) {
+        console.error("Error in authentication check:", error);
+        document.getElementById('username').textContent = "User";
+    }
+}
+
+            // Profile dropdown functionality
+            const profileBtn = document.getElementById('profile-btn');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+            const logoutBtn = document.getElementById('logout-btn');
+            
+            // Toggle dropdown menu when profile button is clicked
+            profileBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('show');
+            });
+            
+            // Close dropdown when clicking elsewhere
+            document.addEventListener('click', function(e) {
+                if (dropdownMenu.classList.contains('show') && 
+                    !profileBtn.contains(e.target) && 
+                    !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+            
+            // Handle logout
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Clear user data from localStorage
+                localStorage.removeItem("token");
+                localStorage.removeItem("username");
+                localStorage.removeItem("userData");
+                // Redirect to login page
+                window.location.href = "login";
+            });
         });
     </script>
-    
 </body>
 </html>
