@@ -16,7 +16,7 @@ app.config["JWT_SECRET_KEY"] = "prarthanalevelup"  # JWT authentication
 jwt = JWTManager(app)
 
 # MongoDB Atlas Connection
-client = MongoClient("mongodb+srv://prarthanainfoin:atlasprar@cluster0.gybms.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+client = MongoClient("mongodb+srv://prarthanainfoin:Acql4n67j3wgLBlB@cluster2.yynfhlr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster2")
 db = client["levelup"]
 users_collection = db["gameuser"]
 
